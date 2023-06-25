@@ -1,17 +1,20 @@
 use std::{fs::File, io::Read};
-use super::machine_types::{Word, Address};
+use super::machine_types::{Word, Address, Instruction};
 use super::stack::Stack;
+use super::instruction;
 
+const MAX_CODE_LENGTH: usize = 512;
 struct Machine {
-  pc: i32,
+  pc: Address,
   halt: bool,
   no_output: bool,
-  code: Vec<Word>,
+  code: Vec<Instruction>,
+  debug: bool,
 }
 
 impl Machine {
   fn initialize() -> Self {
-    let new_machine = Machine { pc: 0, halt: false, no_output: false, code: Vec::new() };
+    let new_machine = Machine { pc: 0, halt: false, no_output: false, code: Vec::new(), debug: true };
     new_machine
   }
 
@@ -24,7 +27,24 @@ impl Machine {
 
   fn execute(&mut self, stack: &mut Stack) {
     self.pc += 1;
-    stack.push(1);
+  }
+
+  fn read_program(&mut self, file_contents: &String) -> i32 {
+    let mut program: Vec<Instruction> = Vec::new();
+
+    let mut count: i32 = 0;
+    for line in file_contents.lines() {
+      count += 1;
+      let instr = instruction::read_instruction(line);
+      program.push(instr);
+    }
+
+    if count >= MAX_CODE_LENGTH as i32 {
+      panic!("Error: Too many instructions! (Code length: {}, Max: {})", count, MAX_CODE_LENGTH);
+    }
+
+    self.code = program;
+    count
   }
 }
 
@@ -34,9 +54,14 @@ pub fn start_machine(file_name: &String) {
 
   println!("Reading file `{}`...", file_name);
   let file_contents: String = open_file(file_name);
-  println!("File read successfully! Length: {}", file_contents.len());
 
-  println!("\nTracing...");
+  let program_length = machine.read_program(&file_contents);
+  println!("File read successfully! Program length: {}", program_length);
+
+  if !machine.no_output {
+    println!("\nTracing...");
+
+  }
   machine.print_machine(&stack);
   machine.execute(&mut stack);
   machine.print_machine(&stack);

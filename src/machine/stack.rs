@@ -2,7 +2,7 @@ use super::machine_types::{Word, Address};
 //use std::{sync::Mutex, char::MAX};
 //use once_cell::sync::OnceCell;
 
-pub const MAX_STACK_HEIGHT: usize = 2048;
+const MAX_STACK_HEIGHT: usize = 2048;
 
 pub struct Stack {
   stack: [Word; MAX_STACK_HEIGHT],
