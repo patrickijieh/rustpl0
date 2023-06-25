@@ -1,6 +1,4 @@
 use super::machine_types::{Word, Address};
-//use std::{sync::Mutex, char::MAX};
-//use once_cell::sync::OnceCell;
 
 const MAX_STACK_HEIGHT: usize = 2048;
 
