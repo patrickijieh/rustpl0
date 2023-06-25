@@ -6,7 +6,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 2 {
-        println!("Usage: rustpl0 <filename>");
+        println!("Usage: `rustpl0 <filename>`");
         exit(0);
     }
 
