@@ -9,7 +9,7 @@ fn main() {
     let mut trace: bool = false;
 
     if args.len() < 2 {
-        println!("Usage: `rustpl0 <filename> (-d | -debug) (-t | -trace)`");
+        println!("Usage: `rustpl0 <filename> [-d | -debug] [-t | -trace]`");
         exit(0);
     }
 
@@ -23,14 +23,13 @@ fn main() {
             trace = true;
           },
           _ => {
-            println!("Usage: `rustpl0 <filename> (-d | -debug) (-t | -trace)`");
+            println!("Usage: `rustpl0 <filename> [-d | -debug] [-t | -trace]`");
             exit(0);
           }
         }
       }
     }
     
-
     let filepath = &args[1];
     start_machine(&filepath, debug, trace);
 }

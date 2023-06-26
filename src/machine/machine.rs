@@ -36,7 +36,7 @@ impl Machine {
 
     if !self.no_out {
       if self.debug {
-        println!("File read successfully! Program length: {}", program_length);
+        println!("Program length: {}", program_length);
       }
       self.print_program(program_length);
       println!("\nTracing...");
@@ -220,6 +220,7 @@ impl Machine {
           println!("NDB");
           println!("{:->40}", "");
         }
+        println!("\nno_out");
         self.no_out = true;
       },
       15 => { // NEG
