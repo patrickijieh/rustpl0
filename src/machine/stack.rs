@@ -97,9 +97,26 @@ impl Stack {
     self.stack[addr as usize] = value;
   }
 
+  pub fn return_stack(&mut self, mut _pc: Address) {
+    _pc = self.pop();
+    self.bp = self.pop();
+    self.pop();
+    self.stack_invariant();
+  }
+
+  pub fn call(&mut self, return_address: Address) {
+    let old_bp = self.bp;
+    let old_sp = self.sp;
+    self.push(self.fetch(old_bp));
+    self.push(old_bp);
+    self.push(return_address);
+    self.bp = old_sp;
+  }
+
   pub fn print_stack(&self) {
     for i in self.bp..self.sp {
-      println!("S[{}]: {}", i, self.stack[i as usize]);
+      print!("S[{}]: {} ", i, self.stack[i as usize]);
     }
+    println!();
   }
 }
