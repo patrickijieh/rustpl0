@@ -205,7 +205,7 @@ impl Machine {
           println!("CHI");
           println!("{:->40}", "");
         }
-        let input: Word = read_input();
+        let input: Word = read_console_input();
         stack.push(input);
       },
       13 => { // HLT
@@ -434,7 +434,7 @@ fn open_file(file_name: &String) -> String {
   contents
 }
 
-fn read_input() -> i32 {
+fn read_console_input() -> i32 {
   print!("INPUT > ");
   let _ = stdout().flush();
   let mut input = String::new();
