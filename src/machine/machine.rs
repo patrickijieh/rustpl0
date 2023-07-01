@@ -421,16 +421,26 @@ pub fn start_machine(file_name: &String, debug: bool, trace: bool) {
 fn open_file(file_name: &String) -> String {
   let file_path: String = file_name.to_owned();
 
-  let error_msg: String = format!("Error: Could not read file `{}`", file_path);
+  let file = File::open(file_path.clone());
 
-  let mut file = File::open(file_path)
-    .expect(error_msg.as_str());
+  match file {
+    Ok(_) => {},
+    Err(_) => {
+      panic!("Error: Could not open file `{}`", file_path);
+    },
+  }
 
   let mut contents = String::new();
 
-  file.read_to_string(&mut contents)
-    .expect(error_msg.as_str());
-
+  match file {
+    Ok(mut f) => {
+      let _ = f.read_to_string(&mut contents);
+    },
+    Err(_) => {
+      panic!("Error: Could not read file `{}`", file_path);
+    },
+  }
+  
   contents
 }
 
