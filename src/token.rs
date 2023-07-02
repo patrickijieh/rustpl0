@@ -1,6 +1,6 @@
 const NUM_TOKENS: usize = 34;
 
-const type_to_str: [&str; NUM_TOKENS] = [
+const TYPE_TO_STR: [&str; NUM_TOKENS] = [
   "periodsym", "constsym", "semisym", "commasym",
   "varsym", "procsym", "becomessym", "callsym", "beginsym", "endsym",
   "ifsym", "thensym", "elsesym", "whilesym", "dosym",
@@ -12,31 +12,31 @@ const type_to_str: [&str; NUM_TOKENS] = [
   "eofsym"
 ];
 
-pub enum token_type {
-  periodsym, constsym, semisym, commasym,
-  varsym, procsym, becomessym, callsym, beginsym, endsym,
-  ifsym, thensym, elsesym, whilesym, dosym, 
-  readsym, writesym, skipsym,
-  oddsym, lparensym, rparensym,
-  identsym, numbersym, 
-  eqsym, neqsym, lessym, leqsym, gtrsym, geqsym, 
-  plussym, minussym, multsym, divsym, 
-  eofsym
+pub enum TokenType {
+  Periodsym, Constsym, Semisym, Commasym,
+  Varsym, Procsym, Becomessym, Callsym, Beginsym, Endsym,
+  Ifsym, Thensym, Elsesym, Whilesym, Dosym, 
+  Readsym, Writesym, Skipsym,
+  Oddsym, Lparensym, Rparensym,
+  Identsym, Numbersym, 
+  Eqsym, Neqsym, Lessym, Leqsym, Gtrsym, Geqsym, 
+  Plussym, Minussym, Multsym, Divsym, 
+  Eofsym
 }
 
-pub struct token {
-  token_type: typ,
-  filename: String,
-  line: i32,
-  column: i32,
-  text: String,
-  value: i32
+pub struct Token {
+  pub typ: TokenType,
+  pub filename: String,
+  pub line: i32,
+  pub column: i32,
+  pub text: String,
+  pub value: i32
 }
 
-impl token {
+impl Token {
   pub fn new() -> Self {
-    token {
-      token_type: token_type::eofsym,
+    Token {
+      typ: TokenType::Eofsym,
       filename: String::new(),
       line: 0,
       column: 0,
@@ -44,8 +44,19 @@ impl token {
       value: 0
     }
   }
+
+  pub fn with_file(file_name: String) -> Self {
+    Token {
+      typ: TokenType::Eofsym,
+      filename: file_name,
+      line: 0,
+      column: 0,
+      text: String::new(),
+      value: 0
+    }
+  }
   
-  pub fn ttyp2str(&self, ttyp: token_type) -> String {
-    type_to_str[ttyp as usize].to_string()
+  pub fn ttyp2str(&self, ttyp: TokenType) -> String {
+    TYPE_TO_STR[ttyp as usize].to_string()
   }
 }
