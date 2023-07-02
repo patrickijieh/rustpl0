@@ -12,7 +12,7 @@ const type_to_str: [&str; NUM_TOKENS] = [
   "eofsym"
 ];
 
-enum token_type {
+pub enum token_type {
   periodsym, constsym, semisym, commasym,
   varsym, procsym, becomessym, callsym, beginsym, endsym,
   ifsym, thensym, elsesym, whilesym, dosym, 

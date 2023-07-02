@@ -1,7 +1,9 @@
 pub mod machine;
+pub mod lexer;
 
 use std::{env, process::exit};
-use machine::machine::start_machine;
+//use machine::machine::start_machine;
+use lexer::lexer_open;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -31,5 +33,6 @@ fn main() {
     }
     
     let filepath = &args[1];
-    start_machine(&filepath, debug, trace);
+    //start_machine(&filepath, debug, trace);
+    lexer_open(&filepath);
 }
