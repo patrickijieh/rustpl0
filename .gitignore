@@ -1,3 +1,4 @@
 /target
 *.vmi
 *.code-workspace
+*.pl0
