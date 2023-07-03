@@ -1,6 +1,7 @@
 pub mod machine;
 pub mod lexer;
 pub mod token;
+pub mod reserved_types;
 
 use std::{env, process::exit};
 //use machine::machine::start_machine;

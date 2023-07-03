@@ -12,6 +12,7 @@ const TYPE_TO_STR: [&str; NUM_TOKENS] = [
   "eofsym"
 ];
 
+#[derive(Debug, PartialEq)] 
 pub enum TokenType {
   Periodsym, Constsym, Semisym, Commasym,
   Varsym, Procsym, Becomessym, Callsym, Beginsym, Endsym,
@@ -22,6 +23,12 @@ pub enum TokenType {
   Eqsym, Neqsym, Lessym, Leqsym, Gtrsym, Geqsym, 
   Plussym, Minussym, Multsym, Divsym, 
   Eofsym
+}
+
+impl Copy for TokenType { }
+
+impl Clone for TokenType {
+  fn clone(&self) -> Self { *self }
 }
 
 pub struct Token {
@@ -56,7 +63,11 @@ impl Token {
     }
   }
   
-  pub fn ttyp2str(&self, ttyp: TokenType) -> String {
-    TYPE_TO_STR[ttyp as usize].to_string()
+  pub fn ttyp2str(&self) -> String {
+    TYPE_TO_STR[self.typ as usize].to_string()
   }
+}
+
+pub fn type_to_string(ttyp: TokenType) -> String {
+  TYPE_TO_STR[ttyp as usize].to_string()
 }
