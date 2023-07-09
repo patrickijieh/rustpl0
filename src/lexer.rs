@@ -58,10 +58,9 @@ impl Lexer {
     }
     err_pointer = err_pointer + "^\n";
 
-    let _ = stderr().flush();
-
     let err_str: String = format!("{}: At line: {}, column: {}\nError: {}\n", self.input_file_name, line_number, col_number, clean_msg);
 
+    let _ = stderr().flush();
     let _ = stderr().write_all(err_str.as_bytes());
     let _ = stderr().write_all(err_line.as_bytes());
     let _ = stderr().write_all(err_pointer.as_bytes());
@@ -92,7 +91,6 @@ impl Lexer {
     let c: char = self.getchar();
 
     if c == END_OF_FILE  {
-      //print!("found EOF\n");
       t.typ = TokenType::Eofsym;
       t.text = END_OF_FILE.to_string();
       self.done = true;
@@ -139,7 +137,7 @@ impl Lexer {
         }
       },
       Err(err) => {
-        panic!("Error: {}: Could not read from file '{}'", err.kind(), self.input_file_name);
+        panic!("Error: {}: Could not read next char from file '{}'", err.kind(), self.input_file_name);
       },
     }
 
@@ -177,9 +175,6 @@ impl Lexer {
       } else if is_comment(c) {
         self.consume_comment();
         c = self.getchar();
-        if c == '\n' {
-          println!("hello!");
-        }
       }
     }
     self.ungetchar(c);
@@ -250,30 +245,30 @@ impl Lexer {
   }
 
   fn lexer_assign(&mut self, c: char, mut tok: Token) -> Token {
-    let e = self.getchar();
-    if e != '=' {
-      self.error(format!("Expected '=' after colon, not '{}'.", e).as_str(), c);
+    let s: char = self.getchar();
+    if s != '=' {
+      self.error(format!("Expected '=' after colon, not '{}'.", s).as_str(), c);
     }
 
-    tok.text = c.to_string() + &e.to_string();
+    tok.text = c.to_string() + &s.to_string();
     tok.typ = TokenType::Becomessym;
     tok
   }
 
   fn get_less_than(&mut self, c: char, mut tok: Token) -> Token {
-    let e = self.getchar();
+    let s: char = self.getchar();
 
-    match e {
+    match s {
       '=' => {
-        tok.text = c.to_string() + &e.to_string();
+        tok.text = c.to_string() + &s.to_string();
         tok.typ = TokenType::Leqsym;
       },
       '>' => {
-        tok.text = c.to_string() + &e.to_string();
+        tok.text = c.to_string() + &s.to_string();
         tok.typ = TokenType::Neqsym;
       },
       _ => {
-        self.ungetchar(e);
+        self.ungetchar(s);
         tok.text = c.to_string();
         tok.typ = TokenType::Lessym;
       },
@@ -283,15 +278,15 @@ impl Lexer {
   }
 
   fn get_greater_than(&mut self, c: char, mut tok: Token) -> Token {
-    let e = self.getchar();
+    let s: char = self.getchar();
 
-    match e {
+    match s {
       '=' => {
-        tok.text = c.to_string() + &e.to_string();
+        tok.text = c.to_string() + &s.to_string();
         tok.typ = TokenType::Geqsym;
       },
       _ => {
-        self.ungetchar(e);
+        self.ungetchar(s);
         tok.text = c.to_string();
         tok.typ = TokenType::Gtrsym;
       },
@@ -303,7 +298,6 @@ impl Lexer {
 }
 
 pub fn lexer_open(filename: &String, debug: bool) -> Vec<Token> {
-  //println!("lexer_open()");
   let reader = create_reader(filename);
   let mut lexer = Lexer::initialize(filename, reader, debug);
   let token_stream = lexer.lexer_run();
