@@ -1,4 +1,5 @@
-use std::{fs::File, io::{prelude::*, SeekFrom, BufReader}};
+use std::{fs::File, io::{prelude::*, stderr, Write, SeekFrom, BufReader}, process::exit};
+use crate::lexer_log::{self};
 use crate::token::{Token, TokenType};
 use crate::reserved_types::get_reserved_word;
 
@@ -11,27 +12,37 @@ struct Lexer {
   done: bool,
   line: i32,
   column: i32,
-  last_column: i32
+  last_column: i32,
+  debug: bool,
+  token_stream: Vec<Token>,
 }
 
 impl Lexer {
-  fn initialize(filename: &String, reader: BufReader<File>) -> Self {
-    let new_lexer = Lexer { input_file_name: filename.to_string(), file_reader: reader, done: false, line: 0, column: 0, last_column: 0 };
+  fn initialize(filename: &String, reader: BufReader<File>, do_debug: bool) -> Self {
+    let new_lexer = Lexer { input_file_name: filename.to_string(), file_reader: reader, done: false, line: 0, column: 1, last_column: 0, debug: do_debug, token_stream: Vec::new() };
     new_lexer
   }
 
   fn error(&self, msg: &str) {
-    panic!("Error: {}\nAt line: {}, column: {}", msg, self.line, self.column);
+    let _ = stderr().flush();
+    let bytestr = format!("{}: At line: {}, column: {}\nError: {}\n", self.input_file_name, self.line, self.column, msg);
+    let _ = stderr().write_all(bytestr.as_bytes());
+    exit(101);
   }
 
   fn lexer_run(&mut self) {
     while !self.done {
       let t = self.lexer_next();
-      //print!("token: {}, type: {}", t.text, t.ttyp2str());
+      //print!("token: {}, type: {} (line {}, col {})", t.text, t.ttyp2str(), t.line, t.column);
       if t.typ == TokenType::Numbersym {
         //print!(", value: {}", t.value);
       }
       //println!("");
+      self.token_stream.push(t);
+    }
+
+    if self.debug {
+      lexer_log::create_log(self.input_file_name.clone(), &self.token_stream);
     }
   }
 
@@ -61,6 +72,22 @@ impl Lexer {
 
     t.text = c.to_string();
 
+    match c {
+      ';' => t.typ = TokenType::Semisym,
+      '.' => t.typ = TokenType::Periodsym,
+      ',' => t.typ = TokenType::Commasym,
+      '=' => t.typ = TokenType::Eqsym,
+      '(' => t.typ = TokenType::Lparensym,
+      ')' => t.typ = TokenType::Rparensym,
+      '+' => t.typ = TokenType::Plussym,
+      '-' => t.typ = TokenType::Minussym,
+      '*' => t.typ = TokenType::Multsym,
+      '/' => t.typ = TokenType::Divsym,
+      ':' => return self.lexer_assign(c, t),
+      '<' => return self.get_less_than(c, t),
+      '>' => return self.get_greater_than(c, t),
+      _ => self.error(format!("Illegal character {}!", c).as_str()),
+    }
     //print!("line {} column {} char {}\n", t.line, t.column, c);
 
     t 
@@ -86,7 +113,7 @@ impl Lexer {
 
     if buffer[0] == b'\n' {
       self.line += 1;
-      self.column = 0;
+      self.column = 1;
     } else {
       self.column += 1;
     }
@@ -116,6 +143,9 @@ impl Lexer {
       } else if is_comment(c) {
         self.consume_comment();
         c = self.getchar();
+        if c == '\n' {
+          println!("hello!");
+        }
       }
     }
     self.ungetchar(c);
@@ -186,13 +216,64 @@ impl Lexer {
     tok.typ = TokenType::Numbersym;
     tok
   }
+
+  fn lexer_assign(&mut self, c: char, mut tok: Token) -> Token {
+    let e = self.getchar();
+    if e != '=' {
+      self.error(format!("Expected '=' after colon, not {}!", e).as_str());
+    }
+
+    tok.text = c.to_string() + &e.to_string();
+    tok.typ = TokenType::Becomessym;
+    tok
+  }
+
+  fn get_less_than(&mut self, c: char, mut tok: Token) -> Token {
+    let e = self.getchar();
+
+    match e {
+      '=' => {
+        tok.text = c.to_string() + &e.to_string();
+        tok.typ = TokenType::Leqsym;
+      },
+      '>' => {
+        tok.text = c.to_string() + &e.to_string();
+        tok.typ = TokenType::Neqsym;
+      },
+      _ => {
+        self.ungetchar(e);
+        tok.text = c.to_string();
+        tok.typ = TokenType::Lessym;
+      },
+    }
+
+    tok
+  }
+
+  fn get_greater_than(&mut self, c: char, mut tok: Token) -> Token {
+    let e = self.getchar();
+
+    match e {
+      '=' => {
+        tok.text = c.to_string() + &e.to_string();
+        tok.typ = TokenType::Geqsym;
+      },
+      _ => {
+        self.ungetchar(e);
+        tok.text = c.to_string();
+        tok.typ = TokenType::Gtrsym;
+      },
+    }
+
+    tok
+  }
   
 }
 
-pub fn lexer_open(filename: &String) {
+pub fn lexer_open(filename: &String, debug: bool) {
   //println!("lexer_open()");
   let reader = create_reader(filename);
-  let mut lexer = Lexer::initialize(filename, reader);
+  let mut lexer = Lexer::initialize(filename, reader, debug);
   lexer.lexer_run();
 }
 
@@ -216,7 +297,7 @@ fn create_reader(filename: &String) -> BufReader<File> {
 }
 
 fn is_space(c: char) -> bool {
-  (c == ' ') || (c == '\t')
+  (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r')
 }
 
 fn is_comment(c: char) -> bool {

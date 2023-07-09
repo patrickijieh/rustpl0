@@ -1,5 +1,6 @@
 pub mod machine;
 pub mod lexer;
+pub mod lexer_log;
 pub mod token;
 pub mod reserved_types;
 
@@ -36,5 +37,5 @@ fn main() {
     
     let filepath = &args[1];
     //start_machine(&filepath, debug, trace);
-    lexer_open(&filepath);
+    lexer_open(&filepath, debug);
 }
