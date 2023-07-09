@@ -86,9 +86,8 @@ impl Lexer {
       ':' => return self.lexer_assign(c, t),
       '<' => return self.get_less_than(c, t),
       '>' => return self.get_greater_than(c, t),
-      _ => self.error(format!("Illegal character {}!", c).as_str()),
+      _ => self.error(format!("Illegal character '{}'!", c).as_str()),
     }
-    //print!("line {} column {} char {}\n", t.line, t.column, c);
 
     t 
   }
@@ -105,7 +104,7 @@ impl Lexer {
         }
       },
       Err(err) => {
-        panic!("Error: {}: Could not read from file `{}`", err.kind(), self.input_file_name);
+        panic!("Error: {}: Could not read from file '{}'", err.kind(), self.input_file_name);
       },
     }
 
@@ -113,7 +112,7 @@ impl Lexer {
 
     if buffer[0] == b'\n' {
       self.line += 1;
-      self.column = 1;
+      self.column = 0;
     } else {
       self.column += 1;
     }
@@ -175,7 +174,7 @@ impl Lexer {
 
     while is_alpha(c) || is_numeric(c) {
       if i >= MAX_IDENTIFIER_LENGTH as u8 {
-        self.error(format!("Identifier starting with {} is too long!", ident).as_str());
+        self.error(format!("Identifier starting with '{}' is too long!", ident).as_str());
       }
 
       ident.push(c);
@@ -198,7 +197,7 @@ impl Lexer {
 
     while is_numeric(c) {
       if i >= MAX_NUMBER_LENGTH as u8 {
-        self.error(format!("Number starting with {} is too long!", num).as_str());
+        self.error(format!("Number starting with '{}' is too long!", num).as_str());
       }
       num.push(c);
       i += 1;
@@ -220,7 +219,7 @@ impl Lexer {
   fn lexer_assign(&mut self, c: char, mut tok: Token) -> Token {
     let e = self.getchar();
     if e != '=' {
-      self.error(format!("Expected '=' after colon, not {}!", e).as_str());
+      self.error(format!("Expected '=' after colon, not '{}'!", e).as_str());
     }
 
     tok.text = c.to_string() + &e.to_string();
@@ -286,7 +285,7 @@ fn create_reader(filename: &String) -> BufReader<File> {
   match file {
     Ok(_) => {f = file.unwrap();},
     Err(_) => {
-      panic!("Error: Could not open file `{}`", file_path);
+      panic!("Error: Could not open file '{}'!", file_path);
     },
   }
 
