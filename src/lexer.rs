@@ -25,10 +25,15 @@ impl Lexer {
 
   fn error(&mut self, msg: &str, c: char) {
     self.ungetchar(c);
+
+    let clean_msg: String = msg.replace("\r", " ")
+                          .replace("\n", " ")
+                          .replace(END_OF_FILE, " ");
+                        
     let line_number = self.line;
     let col_number = self.column;
     let mut err_line: String = String::new();
-    let mut err_pointer = String::new();
+    let mut err_pointer: String = String::new();
 
     let _ = self.file_reader.seek(SeekFrom::Current(-(col_number) as i64));
 
@@ -40,26 +45,24 @@ impl Lexer {
       space_count += 1;
     }
 
+    err_line.push('\t');
     while (c != '\n') && (c != '\r') && (c != END_OF_FILE) {
       err_line.push(c);
       c = self.getchar();
     }
-
     err_line.push('\n');
 
     err_pointer.push('\t');
-
     for _ in 0..(col_number - space_count) {
       err_pointer.push(' ');
     }
-
     err_pointer = err_pointer + "^\n";
 
     let _ = stderr().flush();
 
-    let bytestr = format!("{}: At line: {}, column: {}\nError: {}\n\t", self.input_file_name, line_number, col_number, msg);
+    let err_str: String = format!("{}: At line: {}, column: {}\nError: {}\n", self.input_file_name, line_number, col_number, clean_msg);
 
-    let _ = stderr().write_all(bytestr.as_bytes());
+    let _ = stderr().write_all(err_str.as_bytes());
     let _ = stderr().write_all(err_line.as_bytes());
     let _ = stderr().write_all(err_pointer.as_bytes());
     exit(101);
@@ -86,7 +89,7 @@ impl Lexer {
     t.line = self.line;
     t.column = self.column;
 
-    let c = self.getchar();
+    let c: char = self.getchar();
 
     if c == END_OF_FILE  {
       //print!("found EOF\n");
@@ -118,7 +121,7 @@ impl Lexer {
       ':' => return self.lexer_assign(c, t),
       '<' => return self.get_less_than(c, t),
       '>' => return self.get_greater_than(c, t),
-      _ => self.error(format!("Illegal character '{}'!", c).as_str(), c),
+      _ => self.error(format!("Illegal character: '{}', remove this character.", c).as_str(), c),
     }
 
     t 
@@ -167,7 +170,7 @@ impl Lexer {
   }
 
   fn consume_ignored(&mut self) {
-    let mut c = self.getchar();
+    let mut c: char = self.getchar();
     while is_space(c) || is_comment(c) {
       if is_space(c) {
         c = self.getchar();
@@ -183,7 +186,7 @@ impl Lexer {
   }
 
   fn consume_comment(&mut self) {
-    let mut c = self.getchar();
+    let mut c: char = self.getchar();
     while (c != '\n') && (c != END_OF_FILE) {
       c = self.getchar();
     }
@@ -200,11 +203,11 @@ impl Lexer {
 
     ident.push(c);
 
-    let mut c = self.getchar();
+    let mut c: char = self.getchar();
 
     while is_alpha(c) || is_numeric(c) {
       if i >= MAX_IDENTIFIER_LENGTH as u8 {
-        self.error(format!("Identifier starting with '{}' is too long!", ident).as_str(), c);
+        self.error(format!("Identifier starting with: '{}' is too long!", ident).as_str(), c);
       }
 
       ident.push(c);
@@ -219,15 +222,15 @@ impl Lexer {
   }
 
   fn lexer_num(&mut self, c: char, mut tok: Token) -> Token {
-    let mut num = String::new();
-    let mut i: u8 = 0;
+    let mut num: String = String::new();
+    let mut i: u8 = 1;
 
     num.push(c);
-    let mut c = self.getchar();
+    let mut c: char = self.getchar();
 
     while is_numeric(c) {
       if i >= MAX_NUMBER_LENGTH as u8 {
-        self.error(format!("Number starting with '{}' is too long!", num).as_str(), c);
+        self.error(format!("Number starting with: '{}' is too long! Numbers can only be of value 99999 or less.", num).as_str(), c);
       }
       num.push(c);
       i += 1;
@@ -249,7 +252,7 @@ impl Lexer {
   fn lexer_assign(&mut self, c: char, mut tok: Token) -> Token {
     let e = self.getchar();
     if e != '=' {
-      self.error(format!("Expected '=' after colon, not '{}'!", e).as_str(), c);
+      self.error(format!("Expected '=' after colon, not '{}'.", e).as_str(), c);
     }
 
     tok.text = c.to_string() + &e.to_string();
