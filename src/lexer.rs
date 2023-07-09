@@ -29,7 +29,7 @@ impl Lexer {
     let clean_msg: String = msg.replace("\r", " ")
                           .replace("\n", " ")
                           .replace(END_OF_FILE, " ");
-                        
+
     let line_number = self.line;
     let col_number = self.column;
     let mut err_line: String = String::new();
@@ -319,8 +319,11 @@ fn create_reader(filename: &String) -> BufReader<File> {
   let f;
   match file {
     Ok(_) => {f = file.unwrap();},
-    Err(_) => {
-      panic!("Error: Could not open file '{}'!", file_path);
+    Err(err) => {
+      let _ = stderr().flush();
+      let err_str: String = format!("Error: Could not open file: {}; Make sure that this path does exist, and try again.\nError: {}\n", file_path, err);
+      let _ = stderr().write_all(err_str.as_bytes());
+      exit(101);
     },
   }
 
