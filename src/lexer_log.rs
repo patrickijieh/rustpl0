@@ -10,6 +10,7 @@ pub fn create_log(filename: String, token_stream: &Vec<Token>) {
         Ok(file) => {
             log = file;
             write_file(&mut log, filename, token_stream);
+            print!("lexer.log file created!\n");
         },
         Err(_) => {
             println!("Error: could not create log file!");

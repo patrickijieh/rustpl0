@@ -23,21 +23,50 @@ impl Lexer {
     new_lexer
   }
 
-  fn error(&self, msg: &str) {
+  fn error(&mut self, msg: &str) {
+    let line_number = self.line;
+    let col_number = self.column;
+    let mut err_line: String = String::new();
+    let mut err_pointer = String::new();
+
+    let _ = self.file_reader.seek(SeekFrom::Current(-(col_number) as i64));
+
+    let mut c: char = self.getchar();
+
+    let mut space_count = 0;
+    while is_space(c) {
+      c = self.getchar();
+      space_count += 1;
+    }
+
+    while (c != '\n') && (c != '\r') && (c != END_OF_FILE) {
+      err_line.push(c);
+      c = self.getchar();
+    }
+
+    err_line.push('\n');
+
+    err_pointer.push('\t');
+
+    for _ in 0..(col_number - space_count - 1) {
+      err_pointer.push(' ');
+    }
+
+    err_pointer = err_pointer + "^\n";
+
     let _ = stderr().flush();
-    let bytestr = format!("{}: At line: {}, column: {}\nError: {}\n", self.input_file_name, self.line, self.column, msg);
+
+    let bytestr = format!("{}: At line: {}, column: {}\nError: {}\n\t", self.input_file_name, line_number, col_number, msg);
+
     let _ = stderr().write_all(bytestr.as_bytes());
+    let _ = stderr().write_all(err_line.as_bytes());
+    let _ = stderr().write_all(err_pointer.as_bytes());
     exit(101);
   }
 
   fn lexer_run(&mut self) {
     while !self.done {
       let t = self.lexer_next();
-      //print!("token: {}, type: {} (line {}, col {})", t.text, t.ttyp2str(), t.line, t.column);
-      if t.typ == TokenType::Numbersym {
-        //print!(", value: {}", t.value);
-      }
-      //println!("");
       self.token_stream.push(t);
     }
 
