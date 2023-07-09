@@ -112,58 +112,50 @@ impl Machine {
     match instr.op {
       0 => { // NOP
         if self.debug {
-          println!("NOP");
-          println!("{:->40}", "");
+          print_debug_msg(format!("NOP"));
         }
       },
       1 => { // LIT
         if self.debug {
-          println!("LIT {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("LIT {}", instr.m));
         }
         stack.push(instr.m);
       },
       2 => { // RTN
         if self.debug {
-          println!("RTN");
-          println!("{:->40}", "");
+          print_debug_msg(format!("RTN"));
         }
         stack.return_stack(self.pc);
       },
       3 => { // CAL
         if self.debug {
-          println!("CAL {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("CAL"));
         }
         stack.call(self.pc);
       },
       4 => { // POP
         if self.debug {
-          println!("POP {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("POP"));
         }
         stack.pop();
       },
       5 => { // PSI
         if self.debug {
-          println!("PSI {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("PSI"));
         }
         let address: Address = stack.pop();
         stack.push(stack.fetch(address));
       },
       6 => { // LOD
         if self.debug {
-          println!("LOD {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("LOD {}", instr.m));
         }
         let address: Address = stack.pop() + instr.m;
         stack.push(stack.fetch(address));
       },
       7 => { // STO
         if self.debug {
-          println!("STO {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("STO {}", instr.m));
         }
         let word: Word = stack.pop();
         let destination: Address = stack.pop() + instr.m;
@@ -171,22 +163,19 @@ impl Machine {
       },
       8 => { // INC
         if self.debug {
-          println!("INC {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("INC {}", instr.m));
         }
         stack.allocate(instr.m);
       },
       9 => { // JMP
         if self.debug {
-          println!("JMP {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("JMP {}", instr.m));
         }
         self.pc += instr.m - 1;
       },
       10 => { // JPC
         if self.debug {
-          println!("JPC {}", instr.m);
-          println!("{:->40}", "");
+          print_debug_msg(format!("JPC {}", instr.m));
         }
         if stack.pop() != 0 {
           self.pc += instr.m - 1;
@@ -194,47 +183,41 @@ impl Machine {
       },
       11 => { // CHO
         if self.debug {
-          println!("CHO");
-          println!("{:->40}", "");
+          print_debug_msg(format!("CHO"));
         }
         let output: Word = stack.pop();
         println!("OUTPUT: {}", output);
       },
       12 => { // CHI
         if self.debug {
-          println!("CHI");
-          println!("{:->40}", "");
+          print_debug_msg(format!("CHI"));
         }
-        let input: Word = read_input();
+        let input: Word = read_console_input();
         stack.push(input);
       },
       13 => { // HLT
         if self.debug {
-          println!("HLT");
-          println!("{:->40}", "");
+          print_debug_msg(format!("HLT"));
         }
         self.halt = true;
       },
       14 => { // NDB
         if self.debug {
-          println!("NDB");
-          println!("{:->40}", "");
+          print_debug_msg(format!("NDB"));
         }
         println!("\nno_out");
         self.no_out = true;
       },
       15 => { // NEG
         if self.debug {
-          println!("NEG");
-          println!("{:->40}", "");
+          print_debug_msg(format!("NEG"));
         }
         let neg_value: Word = - stack.pop();
         stack.push(neg_value);
       },
       16 => { // ADD
         if self.debug {
-          println!("ADD");
-          println!("{:->40}", "");
+          print_debug_msg(format!("ADD"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -242,8 +225,7 @@ impl Machine {
       },
       17 => { // SUB
         if self.debug {
-          println!("SUB");
-          println!("{:->40}", "");
+          print_debug_msg(format!("SUB"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -251,8 +233,7 @@ impl Machine {
       },
       18 => { // MUL
         if self.debug {
-          println!("MUL");
-          println!("{:->40}", "");
+          print_debug_msg(format!("MUL"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -260,8 +241,7 @@ impl Machine {
       },
       19 => { // DIV
         if self.debug {
-          println!("DIV");
-          println!("{:->40}", "");
+          print_debug_msg(format!("DIV"));
         }
         let top_value: Word = stack.pop();
         if top_value == 0 {
@@ -272,8 +252,7 @@ impl Machine {
       },
       20 => { // MOD
         if self.debug {
-          println!("MOD");
-          println!("{:->40}", "");
+          print_debug_msg(format!("MOD"));
         }
         let top_value: Word = stack.pop();
         if top_value == 0 {
@@ -284,8 +263,7 @@ impl Machine {
       },
       21 => { // EQL
         if self.debug {
-          println!("EQL");
-          println!("{:->40}", "");
+          print_debug_msg(format!("EQL"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -296,8 +274,7 @@ impl Machine {
       },
       22 => { // NEQ
         if self.debug {
-          println!("NEQ");
-          println!("{:->40}", "");
+          print_debug_msg(format!("NEQ"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -308,8 +285,7 @@ impl Machine {
       },
       23 => { // LSS
         if self.debug {
-          println!("LSS");
-          println!("{:->40}", "");
+          print_debug_msg(format!("LSS"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -320,8 +296,7 @@ impl Machine {
       },
       24 => { // LEQ
         if self.debug {
-          println!("LEQ");
-          println!("{:->40}", "");
+          print_debug_msg(format!("LEQ"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -332,8 +307,7 @@ impl Machine {
       },
       25 => { // GTR
         if self.debug {
-          println!("GTR");
-          println!("{:->40}", "");
+          print_debug_msg(format!("GTR"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -344,8 +318,7 @@ impl Machine {
       },
       26 => { // GEQ
         if self.debug {
-          println!("GEQ");
-          println!("{:->40}", "");
+          print_debug_msg(format!("GEQ"));
         }
         let top_value: Word = stack.pop();
         let bottom_value: Word = stack.pop();
@@ -356,29 +329,25 @@ impl Machine {
       },
       27 => { // PSP
         if self.debug {
-          println!("PSP");
-          println!("{:->40}", "");
+          print_debug_msg(format!("PSP"));
         }
         stack.push(stack.size());
       },
       28 => { // PBP
         if self.debug {
-          println!("PBP");
-          println!("{:->40}", "");
+          print_debug_msg(format!("PBP"));
         }
         stack.push(stack.ar_base());
       },
       29 => { // PPC
         if self.debug {
-          println!("PPC");
-          println!("{:->40}", "");
+          print_debug_msg(format!("PPC"));
         }
         stack.push(self.pc);
       },
       30 => { // JMI
         if self.debug {
-          println!("PPC");
-          println!("{:->40}", "");
+          print_debug_msg(format!("JMI"));
         }
         self.pc = stack.pop();
       },
@@ -421,20 +390,30 @@ pub fn start_machine(file_name: &String, debug: bool, trace: bool) {
 fn open_file(file_name: &String) -> String {
   let file_path: String = file_name.to_owned();
 
-  let error_msg: String = format!("Error: Could not read file `{}`", file_path);
+  let file = File::open(file_path.clone());
 
-  let mut file = File::open(file_path)
-    .expect(error_msg.as_str());
+  match file {
+    Ok(_) => {},
+    Err(_) => {
+      panic!("Error: Could not open file `{}`", file_path);
+    },
+  }
 
   let mut contents = String::new();
 
-  file.read_to_string(&mut contents)
-    .expect(error_msg.as_str());
-
+  match file {
+    Ok(mut f) => {
+      let _ = f.read_to_string(&mut contents);
+    },
+    Err(_) => {
+      panic!("Error: Could not read file `{}`", file_path);
+    },
+  }
+  
   contents
 }
 
-fn read_input() -> i32 {
+fn read_console_input() -> i32 {
   print!("INPUT > ");
   let _ = stdout().flush();
   let mut input = String::new();
@@ -455,4 +434,8 @@ fn read_input() -> i32 {
   };
 
   value
+}
+
+fn print_debug_msg(msg: String) {
+  println!("{}\n{:->40}", msg, "");
 }

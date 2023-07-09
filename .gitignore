@@ -1,3 +1,6 @@
 /target
 *.vmi
 *.code-workspace
+*.pl0
+*.log
+*.txt
