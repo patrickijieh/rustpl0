@@ -9,7 +9,7 @@ pub fn create_log(filename: String, token_stream: &Vec<Token>) {
     match f {
         Ok(file) => {
             log = file;
-            write_header(&mut log, filename, token_stream);
+            write_file(&mut log, filename, token_stream);
         },
         Err(_) => {
             println!("Error: could not create log file!");
@@ -17,7 +17,7 @@ pub fn create_log(filename: String, token_stream: &Vec<Token>) {
     }
 }
 
-pub fn write_header(logfile: &mut File, filename: String, token_stream: &Vec<Token>) {
+fn write_file(logfile: &mut File, filename: String, token_stream: &Vec<Token>) {
   let file_header = format!("Tokens from file {}:\n\n", filename);
   let tokens_header = format!("{:12}\t{:8}\t{:8}\t{:12}\n", "Type", "Line", "Column", "Text/Value");
 
