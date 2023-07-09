@@ -19,11 +19,12 @@ struct Lexer {
 
 impl Lexer {
   fn initialize(filename: &String, reader: BufReader<File>, do_debug: bool) -> Self {
-    let new_lexer = Lexer { input_file_name: filename.to_string(), file_reader: reader, done: false, line: 0, column: 1, last_column: 0, debug: do_debug, token_stream: Vec::new() };
+    let new_lexer = Lexer { input_file_name: filename.to_string(), file_reader: reader, done: false, line: 1, column: 1, last_column: 0, debug: do_debug, token_stream: Vec::new() };
     new_lexer
   }
 
-  fn error(&mut self, msg: &str) {
+  fn error(&mut self, msg: &str, c: char) {
+    self.ungetchar(c);
     let line_number = self.line;
     let col_number = self.column;
     let mut err_line: String = String::new();
@@ -48,7 +49,7 @@ impl Lexer {
 
     err_pointer.push('\t');
 
-    for _ in 0..(col_number - space_count - 1) {
+    for _ in 0..(col_number - space_count) {
       err_pointer.push(' ');
     }
 
@@ -64,7 +65,7 @@ impl Lexer {
     exit(101);
   }
 
-  fn lexer_run(&mut self) {
+  fn lexer_run(&mut self) -> Vec<Token> {
     while !self.done {
       let t = self.lexer_next();
       self.token_stream.push(t);
@@ -73,6 +74,8 @@ impl Lexer {
     if self.debug {
       lexer_log::create_log(self.input_file_name.clone(), &self.token_stream);
     }
+
+    self.token_stream.clone()
   }
 
   fn lexer_next(&mut self) -> Token {
@@ -115,7 +118,7 @@ impl Lexer {
       ':' => return self.lexer_assign(c, t),
       '<' => return self.get_less_than(c, t),
       '>' => return self.get_greater_than(c, t),
-      _ => self.error(format!("Illegal character '{}'!", c).as_str()),
+      _ => self.error(format!("Illegal character '{}'!", c).as_str(), c),
     }
 
     t 
@@ -141,7 +144,7 @@ impl Lexer {
 
     if buffer[0] == b'\n' {
       self.line += 1;
-      self.column = 0;
+      self.column = 1;
     } else {
       self.column += 1;
     }
@@ -187,10 +190,8 @@ impl Lexer {
 
     if c == END_OF_FILE {
       self.done = true;
-      self.error("Unexpected end of file while reading comment!");
+      self.error("Unexpected end of file while reading comment!", c);
     }
-
-    self.line += 1;
   }
 
   fn lexer_ident(&mut self, c: char, mut tok: Token) -> Token {
@@ -203,7 +204,7 @@ impl Lexer {
 
     while is_alpha(c) || is_numeric(c) {
       if i >= MAX_IDENTIFIER_LENGTH as u8 {
-        self.error(format!("Identifier starting with '{}' is too long!", ident).as_str());
+        self.error(format!("Identifier starting with '{}' is too long!", ident).as_str(), c);
       }
 
       ident.push(c);
@@ -226,7 +227,7 @@ impl Lexer {
 
     while is_numeric(c) {
       if i >= MAX_NUMBER_LENGTH as u8 {
-        self.error(format!("Number starting with '{}' is too long!", num).as_str());
+        self.error(format!("Number starting with '{}' is too long!", num).as_str(), c);
       }
       num.push(c);
       i += 1;
@@ -248,7 +249,7 @@ impl Lexer {
   fn lexer_assign(&mut self, c: char, mut tok: Token) -> Token {
     let e = self.getchar();
     if e != '=' {
-      self.error(format!("Expected '=' after colon, not '{}'!", e).as_str());
+      self.error(format!("Expected '=' after colon, not '{}'!", e).as_str(), c);
     }
 
     tok.text = c.to_string() + &e.to_string();
@@ -298,11 +299,13 @@ impl Lexer {
   
 }
 
-pub fn lexer_open(filename: &String, debug: bool) {
+pub fn lexer_open(filename: &String, debug: bool) -> Vec<Token> {
   //println!("lexer_open()");
   let reader = create_reader(filename);
   let mut lexer = Lexer::initialize(filename, reader, debug);
-  lexer.lexer_run();
+  let token_stream = lexer.lexer_run();
+
+  token_stream
 }
 
 fn create_reader(filename: &String) -> BufReader<File> {

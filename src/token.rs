@@ -40,6 +40,19 @@ pub struct Token {
   pub value: i32
 }
 
+impl Clone for Token {
+  fn clone(&self) -> Self {
+    Token {
+      typ: self.typ,
+      filename: self.filename.clone(),
+      line: self.line,
+      column: self.column,
+      text: self.text.clone(),
+      value: self.value
+    }
+  }
+}
+
 impl Token {
   pub fn new() -> Self {
     Token {
