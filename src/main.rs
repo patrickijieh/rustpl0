@@ -2,11 +2,14 @@ pub mod machine;
 pub mod lexer;
 pub mod lexer_log;
 pub mod token;
+pub mod ast;
+pub mod parser;
 pub mod reserved_types;
 
 use std::{env, process::exit};
 //use machine::machine::start_machine;
-use lexer::lexer_open;
+//use lexer::lexer_open;
+use parser::parser_open;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -14,8 +17,7 @@ fn main() {
     let mut trace: bool = false;
 
     if args.len() < 2 {
-        println!("Usage: `rustpl0 <filename> [-d | -debug] [-t | -trace]`");
-        exit(0);
+        exit_with_usage();
     }
 
     if args.len() > 2 {
@@ -28,8 +30,7 @@ fn main() {
             trace = true;
           },
           _ => {
-            println!("Usage: `rustpl0 <filename> [-d | -debug] [-t | -trace]`");
-            exit(0);
+            exit_with_usage();
           }
         }
       }
@@ -37,5 +38,11 @@ fn main() {
     
     let filepath = &args[1];
     //start_machine(&filepath, debug, trace);
-    lexer_open(&filepath, debug);
+    //lexer_open(&filepath, debug);
+    parser_open(&filepath, debug, trace);
+}
+
+fn exit_with_usage() {
+  println!("Usage: `rustpl0 <filename> [-d | -debug] [-t | -trace]`");
+  exit(0);
 }
